@@ -25,17 +25,26 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ Handle preflight OPTIONS
+app.options('*', cors(corsOptions)); // ✅ Handle preflight
 
 app.use(express.json());
 
-// ✅ Routes
+// ✅ API Routes
 app.use('/api/content', require('./routes/content'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 
+// ✅ Root
 app.get('/', (req, res) => {
   res.send('ICON Streaming backend');
+});
+
+// ✅ CORS fallback — critical for OPTIONS requests not matching routes
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://admin.iconstreams.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
 });
 
 const PORT = process.env.PORT || 5000;
