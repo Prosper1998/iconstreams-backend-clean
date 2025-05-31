@@ -3,7 +3,7 @@ const Content = require('../models/content');
 const User = require('../models/User');
 const { auth, adminAuth } = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const { uploadToBunny } = require('../config/bunny'); // 👈 NEW
+const { uploadToBunny } = require('../config/bunny');
 
 const router = express.Router();
 
@@ -62,6 +62,51 @@ router.post('/', auth, adminAuth, upload, async (req, res) => {
   }
 });
 
+// Add new content (direct)
+router.post('/direct', auth, adminAuth, upload, async (req, res) => {
+  try {
+    const { title, category, description, status, visibility, tags, publishDate, releaseYear, duration } = req.body;
+    const files = req.files;
+
+    let thumbnailUrl = '';
+    let videoUrl = '';
+
+    if (files?.thumbnail) {
+      const thumbnail = files.thumbnail[0];
+      const result = await uploadToBunny(thumbnail.buffer, `${Date.now()}-${thumbnail.originalname}`, 'thumbnails/');
+      if (!result.success) throw result.error;
+      thumbnailUrl = result.url;
+    }
+
+    if (files?.video) {
+      const video = files.video[0];
+      const result = await uploadToBunny(video.buffer, `${Date.now()}-${video.originalname}`, 'videos/');
+      if (!result.success) throw result.error;
+      videoUrl = result.url;
+    }
+
+    const content = new Content({
+      title,
+      category,
+      description,
+      thumbnail: thumbnailUrl,
+      video: videoUrl,
+      status,
+      visibility,
+      tags: tags ? tags.split(',').map(t => t.trim()) : [],
+      publishDate: publishDate || Date.now(),
+      releaseYear,
+      duration,
+    });
+
+    await content.save();
+    return res.status(201).json({ message: 'Content uploaded successfully', content });
+  } catch (error) {
+    console.error('❌ Direct Content Upload Error:', error);
+    res.status(500).json({ message: 'Upload failed', error: error.message });
+  }
+});
+
 // Update content
 router.put('/:id', auth, adminAuth, upload, async (req, res) => {
   const { title, category, description, status, visibility, tags, publishDate, releaseYear, duration } = req.body;
@@ -105,8 +150,7 @@ router.put('/:id', auth, adminAuth, upload, async (req, res) => {
   }
 });
 
-// Other routes (unchanged)...
-
-// Delete, view, watchlist routes remain the same
+// Other routes (delete, view, watchlist, etc.) remain unchanged
+// Add them here if they exist in your original file
 
 module.exports = router;

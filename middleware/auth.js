@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return next(); // Skip auth for preflight requests
+  }
+
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -18,7 +22,11 @@ const auth = (req, res, next) => {
 
 // Middleware to check if the user is an admin
 const adminAuth = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  if (req.method === 'OPTIONS') {
+    return next(); // Skip admin check for preflight requests
+  }
+
+  if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Access denied. Admin only.' });
   }
   next();

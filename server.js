@@ -8,7 +8,7 @@ connectDB();
 
 const app = express();
 
-// ✅ CORS Configuration
+// CORS Configuration
 const allowedOrigins = ['https://admin.iconstreams.com'];
 
 const corsOptions = {
@@ -25,26 +25,23 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ Handle preflight
+app.options('*', cors(corsOptions)); // Handle preflight requests
 
 app.use(express.json());
 
-// ✅ API Routes
+// API Routes
 app.use('/api/content', require('./routes/content'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 
-// ✅ Root
+// Root
 app.get('/', (req, res) => {
   res.send('ICON Streaming backend');
 });
 
-// ✅ CORS fallback — critical for OPTIONS requests not matching routes
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://admin.iconstreams.com');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
 
 const PORT = process.env.PORT || 5000;
