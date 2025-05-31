@@ -3,7 +3,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 1TB limit
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit (corrected comment)
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|mp4/;
     const mimetype = filetypes.test(file.mimetype);
@@ -19,4 +19,13 @@ const upload = multer({
   { name: 'video', maxCount: 1 },
 ]);
 
-module.exports = upload;
+// Skip OPTIONS requests
+const skipOptions = (middleware) => (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    console.log('Skipping upload middleware for OPTIONS request');
+    return next();
+  }
+  middleware(req, res, next);
+};
+
+module.exports = skipOptions(upload);
