@@ -12,6 +12,7 @@ const app = express();
 const allowedOrigins = [
   'https://admin.iconstreams.com',
   'https://iconstreams.com',
+  'https://www.iconstreams.com',
   'http://localhost:3000'
 ];
 
