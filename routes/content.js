@@ -48,7 +48,7 @@ router.post('/', auth, adminAuth, upload, async (req, res) => {
       video: videoUrl,
       status,
       visibility,
-      tags: tags ? tags.split(',').map(t => t.trim()) : [],
+      tags: Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()),
       publishDate: publishDate || Date.now(),
       releaseYear,
       duration,
@@ -93,7 +93,7 @@ router.post('/direct', auth, adminAuth, upload, async (req, res) => {
       video: videoUrl,
       status,
       visibility,
-      tags: tags ? tags.split(',').map(t => t.trim()) : [],
+      tags: Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()),
       publishDate: publishDate || Date.now(),
       releaseYear,
       duration,
@@ -137,7 +137,7 @@ router.put('/:id', auth, adminAuth, upload, async (req, res) => {
     content.description = description || content.description;
     content.status = status || content.status;
     content.visibility = visibility || content.visibility;
-    content.tags = tags ? tags.split(',').map(t => t.trim()) : content.tags;
+    content.tags = tags ? (Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim())) : content.tags;
     content.publishDate = publishDate || content.publishDate;
     content.releaseYear = releaseYear || content.releaseYear;
     content.duration = duration || content.duration;
@@ -149,8 +149,5 @@ router.put('/:id', auth, adminAuth, upload, async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-
-// Other routes (delete, view, watchlist, etc.) remain unchanged
-// Add them here if they exist in your original file
 
 module.exports = router;
