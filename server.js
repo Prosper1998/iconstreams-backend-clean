@@ -9,10 +9,15 @@ connectDB();
 const app = express();
 
 // CORS Configuration
-const allowedOrigins = ['https://admin.iconstreams.com'];
+const allowedOrigins = [
+  'https://admin.iconstreams.com',
+  'https://iconstreams.com',
+  'http://localhost:3000'
+];
 
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log('Incoming request origin:', origin); // Optional: remove in production
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
