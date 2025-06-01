@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Add new content
+// Add new content (file upload flow)
 router.post('/', auth, adminAuth, upload, async (req, res) => {
   try {
     const {
@@ -65,34 +65,15 @@ router.post('/', auth, adminAuth, upload, async (req, res) => {
   }
 });
 
-// Add new content (direct)
-router.post('/direct', auth, adminAuth, upload, async (req, res) => {
+// Add new content (direct JSON + BunnyCDN URLs)
+router.post('/direct', auth, adminAuth, async (req, res) => {
   try {
     const {
       title, category, description, status, visibility,
-      tags, publishDate, releaseYear, duration
+      tags, publishDate, releaseYear, duration, thumbnail, video
     } = req.body;
-    const files = req.files;
 
-    let thumbnailUrl = '';
-    let videoUrl = '';
-
-    if (files?.thumbnail) {
-      const thumbnail = files.thumbnail[0];
-      const result = await uploadToBunny(thumbnail.buffer, `${Date.now()}-${thumbnail.originalname}`, 'thumbnails/');
-      if (!result.success) throw result.error;
-      thumbnailUrl = result.url;
-    }
-
-    if (files?.video) {
-      const video = files.video[0];
-      const result = await uploadToBunny(video.buffer, `${Date.now()}-${video.originalname}`, 'videos/');
-      if (!result.success) throw result.error;
-      videoUrl = result.url;
-    }
-
-    // ✅ Ensure required media fields are not empty
-    if (!thumbnailUrl || !videoUrl) {
+    if (!thumbnail || !video) {
       return res.status(400).json({ message: 'Both thumbnail and video are required.' });
     }
 
@@ -100,8 +81,8 @@ router.post('/direct', auth, adminAuth, upload, async (req, res) => {
       title,
       category,
       description,
-      thumbnail: thumbnailUrl,
-      video: videoUrl,
+      thumbnail,
+      video,
       status,
       visibility,
       tags: Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()),
