@@ -147,7 +147,7 @@ router.put('/:id', auth, adminAuth, upload, async (req, res) => {
   }
 });
 
-// ✅ New: Watchlist route
+// ✅ Watchlist route
 router.get('/watchlist', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate('watchlist');
@@ -156,6 +156,22 @@ router.get('/watchlist', auth, async (req, res) => {
   } catch (err) {
     console.error('Watchlist fetch error:', err);
     res.status(500).json({ message: 'Failed to load watchlist' });
+  }
+});
+
+// ✅ Increment view count
+router.post('/:id/view', async (req, res) => {
+  try {
+    const content = await Content.findById(req.params.id);
+    if (!content) return res.status(404).json({ message: 'Content not found' });
+
+    content.views = (content.views || 0) + 1;
+    await content.save();
+
+    res.status(200).json({ message: 'View count updated', views: content.views });
+  } catch (err) {
+    console.error('View count error:', err);
+    res.status(500).json({ message: 'Failed to update views' });
   }
 });
 
