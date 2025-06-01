@@ -20,7 +20,10 @@ router.get('/', async (req, res) => {
 // Add new content
 router.post('/', auth, adminAuth, upload, async (req, res) => {
   try {
-    const { title, category, description, status, visibility, tags, publishDate, releaseYear, duration } = req.body;
+    const {
+      title, category, description, status, visibility,
+      tags, publishDate, releaseYear, duration
+    } = req.body;
     const files = req.files;
 
     let thumbnailUrl = '';
@@ -65,7 +68,10 @@ router.post('/', auth, adminAuth, upload, async (req, res) => {
 // Add new content (direct)
 router.post('/direct', auth, adminAuth, upload, async (req, res) => {
   try {
-    const { title, category, description, status, visibility, tags, publishDate, releaseYear, duration } = req.body;
+    const {
+      title, category, description, status, visibility,
+      tags, publishDate, releaseYear, duration
+    } = req.body;
     const files = req.files;
 
     let thumbnailUrl = '';
@@ -83,6 +89,11 @@ router.post('/direct', auth, adminAuth, upload, async (req, res) => {
       const result = await uploadToBunny(video.buffer, `${Date.now()}-${video.originalname}`, 'videos/');
       if (!result.success) throw result.error;
       videoUrl = result.url;
+    }
+
+    // ✅ Ensure required media fields are not empty
+    if (!thumbnailUrl || !videoUrl) {
+      return res.status(400).json({ message: 'Both thumbnail and video are required.' });
     }
 
     const content = new Content({
@@ -109,7 +120,10 @@ router.post('/direct', auth, adminAuth, upload, async (req, res) => {
 
 // Update content
 router.put('/:id', auth, adminAuth, upload, async (req, res) => {
-  const { title, category, description, status, visibility, tags, publishDate, releaseYear, duration } = req.body;
+  const {
+    title, category, description, status, visibility,
+    tags, publishDate, releaseYear, duration
+  } = req.body;
   const files = req.files;
 
   try {
@@ -137,7 +151,9 @@ router.put('/:id', auth, adminAuth, upload, async (req, res) => {
     content.description = description || content.description;
     content.status = status || content.status;
     content.visibility = visibility || content.visibility;
-    content.tags = tags ? (Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim())) : content.tags;
+    content.tags = tags
+      ? (Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()))
+      : content.tags;
     content.publishDate = publishDate || content.publishDate;
     content.releaseYear = releaseYear || content.releaseYear;
     content.duration = duration || content.duration;
