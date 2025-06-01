@@ -147,4 +147,16 @@ router.put('/:id', auth, adminAuth, upload, async (req, res) => {
   }
 });
 
+// ✅ New: Watchlist route
+router.get('/watchlist', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('watchlist');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user.watchlist || []);
+  } catch (err) {
+    console.error('Watchlist fetch error:', err);
+    res.status(500).json({ message: 'Failed to load watchlist' });
+  }
+});
+
 module.exports = router;
